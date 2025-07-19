@@ -55,10 +55,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen, onTog
       <div 
         id="sidebar"
         className={`
-          fixed top-0 left-0 h-screen bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 lg:h-screen
+          fixed top-0 left-0 h-full bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0 shadow-2xl lg:shadow-none' : '-translate-x-full lg:translate-x-0'}
           w-64 flex flex-col
         `}
+        style={{ height: '100vh' }}
       >
         {/* Header with close button */}
         <div className="flex items-center justify-between p-6 border-b border-sidebar-border lg:border-none">

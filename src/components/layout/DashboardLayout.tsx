@@ -30,7 +30,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           onToggle={toggleSidebar}
         />
         
-        <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
+        <div className="flex-1 flex flex-col min-h-screen sidebar-offset">
           <Header onMenuToggle={toggleSidebar} />
           
           <main className="flex-1 p-6 overflow-auto bg-muted/30">

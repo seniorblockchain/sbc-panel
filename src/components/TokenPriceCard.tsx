@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react';
-import { getSBCTokenInfo } from '../services/api';
+import { Copy, ExternalLink, TrendingUp, Activity, Droplet, BarChart3, Clock, Users, RefreshCw } from 'lucide-react';
+import { getSBCTokenInfo, formatVolume, formatLiquidity, formatMarketCap, formatDate } from '../services/api';
 import type { TokenInfo } from '../types';
 
 const TokenPriceCard: React.FC = () => {
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const fetchTokenInfo = async () => {
+    const fetchTokenInfo = async (isInitialLoad = false) => {
       try {
-        setLoading(true);
+        if (isInitialLoad) {
+          setLoading(true);
+        } else {
+          setIsRefreshing(true);
+        }
+        
         const info = await getSBCTokenInfo();
         setTokenInfo(info);
         setError(null);
@@ -19,14 +25,19 @@ const TokenPriceCard: React.FC = () => {
         setError('Failed to fetch token information');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (isInitialLoad) {
+          setLoading(false);
+        } else {
+          setIsRefreshing(false);
+        }
       }
     };
 
-    fetchTokenInfo();
+    // Initial load
+    fetchTokenInfo(true);
     
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchTokenInfo, 30000);
+    // Background refresh every 45 seconds (less frequent to be less noticeable)
+    const interval = setInterval(() => fetchTokenInfo(false), 45000);
     
     return () => clearInterval(interval);
   }, []);
@@ -62,9 +73,6 @@ const TokenPriceCard: React.FC = () => {
     );
   }
 
-  const priceChangeColor = tokenInfo.price_change_24h_percent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-  const TrendIcon = tokenInfo.price_change_24h_percent >= 0 ? TrendingUp : TrendingDown;
-
   return (
     <div className="bg-card rounded-xl shadow-lg p-6 border border-border card-hover">
       {/* Header */}
@@ -80,16 +88,25 @@ const TokenPriceCard: React.FC = () => {
             <p className="text-muted-foreground">{tokenInfo.symbol}</p>
           </div>
         </div>
-        <button
-          onClick={openTonScan}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
-          title="View on TonScan"
-        >
-          <ExternalLink className="w-5 h-5 text-muted-foreground" />
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={openTonScan}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            title="View on TonScan"
+          >
+            <ExternalLink className="w-5 h-5 text-muted-foreground" />
+          </button>
+          
+          {/* Subtle refresh indicator */}
+          {isRefreshing && (
+            <div className="p-2">
+              <RefreshCw className="w-4 h-4 text-muted-foreground animate-spin" />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Price */}
+      {/* Price - without 24h change */}
       <div className="mb-6">
         <div className="text-3xl font-bold text-card-foreground mb-1">
           ${tokenInfo.price_usd.toLocaleString('en-US', { 
@@ -97,48 +114,153 @@ const TokenPriceCard: React.FC = () => {
             maximumFractionDigits: 6 
           })}
         </div>
-        <div className={`flex items-center space-x-1 ${priceChangeColor}`}>
-          <TrendIcon className="w-4 h-4" />
-          <span className="font-medium">
-            {tokenInfo.price_change_24h_percent >= 0 ? '+' : ''}
-            {tokenInfo.price_change_24h_percent.toFixed(2)}%
-          </span>
-          <span className="text-muted-foreground">24h</span>
+        <div className="text-muted-foreground text-sm">
+          Current Price USD
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Enhanced Stats Grid */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-muted rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Market Cap</div>
+          <div className="flex items-center space-x-2 mb-1">
+            <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            <div className="text-sm text-muted-foreground">Market Cap</div>
+          </div>
           <div className="text-lg font-semibold text-card-foreground">
-            ${tokenInfo.market_cap_usd.toLocaleString()}
+            {formatMarketCap(tokenInfo.market_cap_usd)}
           </div>
         </div>
+        
         <div className="bg-muted rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Holders</div>
+          <div className="flex items-center space-x-2 mb-1">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <div className="text-sm text-muted-foreground">Holders</div>
+          </div>
           <div className="text-lg font-semibold text-card-foreground">
             {tokenInfo.holders.toLocaleString()}
           </div>
         </div>
+
+        {tokenInfo.fdv && (
+          <div className="bg-muted rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              <div className="text-sm text-muted-foreground">FDV</div>
+            </div>
+            <div className="text-lg font-semibold text-card-foreground">
+              {formatMarketCap(tokenInfo.fdv)}
+            </div>
+          </div>
+        )}
+
+        {tokenInfo.liquidity_usd && (
+          <div className="bg-muted rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-1">
+              <Droplet className="w-4 h-4 text-muted-foreground" />
+              <div className="text-sm text-muted-foreground">Liquidity</div>
+            </div>
+            <div className="text-lg font-semibold text-card-foreground">
+              {formatLiquidity(tokenInfo.liquidity_usd)}
+            </div>
+          </div>
+        )}
+
+        {tokenInfo.volume_24h !== undefined && (
+          <div className="bg-muted rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-1">
+              <Activity className="w-4 h-4 text-muted-foreground" />
+              <div className="text-sm text-muted-foreground">Volume 24h</div>
+            </div>
+            <div className="text-lg font-semibold text-card-foreground">
+              {formatVolume(tokenInfo.volume_24h)}
+            </div>
+          </div>
+        )}
+
         <div className="bg-muted rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Total Supply</div>
           <div className="text-lg font-semibold text-card-foreground">
             {tokenInfo.total_supply}
           </div>
         </div>
-        <div className="bg-muted rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Decimals</div>
-          <div className="text-lg font-semibold text-card-foreground">
-            {tokenInfo.decimals}
-          </div>
-        </div>
       </div>
 
-      {/* Contract Address */}
+      {/* Trading Information */}
+      {(tokenInfo.transactions_24h || tokenInfo.dex_id) && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-3">Trading Info</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {tokenInfo.dex_id && (
+              <div className="bg-muted rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">DEX</div>
+                <div className="text-lg font-semibold text-card-foreground capitalize">
+                  {tokenInfo.dex_id}
+                </div>
+              </div>
+            )}
+
+            {tokenInfo.transactions_24h && (
+              <div className="bg-muted rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Transactions 24h</div>
+                <div className="text-lg font-semibold text-card-foreground">
+                  <span className="text-green-600">{tokenInfo.transactions_24h.buys} buys</span>
+                  {' / '}
+                  <span className="text-red-600">{tokenInfo.transactions_24h.sells} sells</span>
+                </div>
+              </div>
+            )}
+
+            {tokenInfo.pair_created_at && (
+              <div className="bg-muted rounded-lg p-4 col-span-2">
+                <div className="flex items-center space-x-2 mb-1">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">Pair Created</div>
+                </div>
+                <div className="text-lg font-semibold text-card-foreground">
+                  {formatDate(tokenInfo.pair_created_at)}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Token Pair Information */}
+      {(tokenInfo.base_token || tokenInfo.quote_token) && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-3">Trading Pair</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {tokenInfo.base_token && (
+              <div className="bg-muted rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Base Token</div>
+                <div className="font-semibold text-card-foreground">
+                  {tokenInfo.base_token.symbol}
+                </div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {tokenInfo.base_token.name}
+                </div>
+              </div>
+            )}
+
+            {tokenInfo.quote_token && (
+              <div className="bg-muted rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Quote Token</div>
+                <div className="font-semibold text-card-foreground">
+                  {tokenInfo.quote_token.symbol}
+                </div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {tokenInfo.quote_token.name}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Contract Address & Links */}
       <div className="border-t border-border pt-4">
         <div className="text-sm text-muted-foreground mb-2">Contract Address</div>
-        <div className="flex items-center justify-between bg-muted rounded-lg p-3">
+        <div className="flex items-center justify-between bg-muted rounded-lg p-3 mb-3">
           <code className="text-sm font-mono text-card-foreground truncate flex-1 mr-2">
             {tokenInfo.contract_address}
           </code>
@@ -149,6 +271,27 @@ const TokenPriceCard: React.FC = () => {
           >
             <Copy className="w-4 h-4 text-muted-foreground" />
           </button>
+        </div>
+
+        {/* External Links */}
+        <div className="flex space-x-2">
+          <button
+            onClick={openTonScan}
+            className="flex-1 bg-muted hover:bg-muted/80 text-card-foreground px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
+          >
+            <ExternalLink className="w-4 h-4" />
+            <span>TonScan</span>
+          </button>
+          
+          {tokenInfo.pair_address && (
+            <button
+              onClick={() => window.open(`https://dexscreener.com/ton/${tokenInfo.pair_address}`, '_blank')}
+              className="flex-1 bg-muted hover:bg-muted/80 text-card-foreground px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>DexScreener</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

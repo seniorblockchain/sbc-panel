@@ -114,9 +114,15 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html, body {
+    overflow-x: hidden;
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    position: relative;
   }
   
   /* Ensure text colors are properly inherited */
@@ -219,6 +225,22 @@ tc-root {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary));
+}
+
+/* Sidebar positioning fix */
+#sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  z-index: 50 !important;
+}
+
+/* Ensure main content doesn't overlap with sidebar */
+@media (min-width: 1024px) {
+  .sidebar-offset {
+    margin-left: 16rem; /* 64 * 0.25rem = 16rem */
+  }
 }
 
 /* Animations */

@@ -5,20 +5,20 @@ const SBC_CONTRACT_ADDRESS = 'EQBIQe_KkVxaJmga7LVgwvB8lcXbbfsqdziGgDXfD-zW4KU9';
 const TON_API_BASE = 'https://tonapi.io/v2';
 const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
 
-// Get SBC token information from TON API
+// Get SBC token information from TON API and DexScreener
 export const getSBCTokenInfo = async (): Promise<TokenInfo> => {
   try {
     // Fetch basic token info from TON API
     const tokenResponse = await axios.get(`${TON_API_BASE}/jettons/${SBC_CONTRACT_ADDRESS}`);
     const tokenData = tokenResponse.data;
 
-    // Try to get price from DexScreener (if available)
-    let priceData = null;
+    // Get comprehensive price and trading data from DexScreener
+    let dexData = null;
     try {
-      const priceResponse = await axios.get(`${DEXSCREENER_API}/tokens/${SBC_CONTRACT_ADDRESS}`);
-      priceData = priceResponse.data?.pairs?.[0];
+      const dexResponse = await axios.get(`${DEXSCREENER_API}/search?q=${SBC_CONTRACT_ADDRESS}`);
+      dexData = dexResponse.data?.pairs?.[0];
     } catch (error) {
-      console.warn('Price data not available from DexScreener');
+      console.warn('DexScreener data not available');
     }
 
     // Fetch holders count
@@ -29,13 +29,49 @@ export const getSBCTokenInfo = async (): Promise<TokenInfo> => {
       name: tokenData.metadata?.name || 'Senior Blockchain Company',
       symbol: tokenData.metadata?.symbol || 'SBC',
       logo: tokenData.metadata?.image || 'https://imgproxy.toncenter.com/_TXdvYr6mddtF25A4OiZ1OB34u_7NOu88J9U17qdcM0/pr:small/aHR0cHM6Ly9hdmF0YXJzLmdpdGh1YnVzZXJjb250ZW50LmNvbS91LzE0ODQ1MjcwNg',
-      price_usd: priceData?.priceUsd ? parseFloat(priceData.priceUsd) : 0,
-      price_change_24h_percent: priceData?.priceChange?.h24 ? parseFloat(priceData.priceChange.h24) : 0,
-      market_cap_usd: priceData?.marketCap ? parseFloat(priceData.marketCap) : 0,
+      price_usd: dexData?.priceUsd ? parseFloat(dexData.priceUsd) : 0,
+      price_change_24h_percent: dexData?.priceChange?.h24 ? parseFloat(dexData.priceChange.h24) : 0,
+      market_cap_usd: dexData?.marketCap ? parseFloat(dexData.marketCap) : 0,
       holders: holdersCount,
       total_supply: tokenData.total_supply ? formatTokenAmount(tokenData.total_supply, tokenData.metadata?.decimals || 9) : '256,000,000 SBC',
       contract_address: SBC_CONTRACT_ADDRESS,
-      decimals: tokenData.metadata?.decimals || 9
+      decimals: tokenData.metadata?.decimals || 9,
+      // Enhanced DexScreener data
+      fdv: dexData?.fdv ? parseFloat(dexData.fdv) : undefined,
+      liquidity_usd: dexData?.liquidity?.usd ? parseFloat(dexData.liquidity.usd) : undefined,
+      volume_24h: dexData?.volume?.h24 ? parseFloat(dexData.volume.h24) : undefined,
+      volume_h6: dexData?.volume?.h6 ? parseFloat(dexData.volume.h6) : undefined,
+      volume_h1: dexData?.volume?.h1 ? parseFloat(dexData.volume.h1) : undefined,
+      volume_m5: dexData?.volume?.m5 ? parseFloat(dexData.volume.m5) : undefined,
+      transactions_24h: dexData?.txns?.h24 ? {
+        buys: dexData.txns.h24.buys || 0,
+        sells: dexData.txns.h24.sells || 0
+      } : undefined,
+      transactions_h6: dexData?.txns?.h6 ? {
+        buys: dexData.txns.h6.buys || 0,
+        sells: dexData.txns.h6.sells || 0
+      } : undefined,
+      transactions_h1: dexData?.txns?.h1 ? {
+        buys: dexData.txns.h1.buys || 0,
+        sells: dexData.txns.h1.sells || 0
+      } : undefined,
+      transactions_m5: dexData?.txns?.m5 ? {
+        buys: dexData.txns.m5.buys || 0,
+        sells: dexData.txns.m5.sells || 0
+      } : undefined,
+      pair_created_at: dexData?.pairCreatedAt ? dexData.pairCreatedAt : undefined,
+      dex_id: dexData?.dexId || undefined,
+      pair_address: dexData?.pairAddress || undefined,
+      base_token: dexData?.baseToken ? {
+        address: dexData.baseToken.address,
+        name: dexData.baseToken.name,
+        symbol: dexData.baseToken.symbol
+      } : undefined,
+      quote_token: dexData?.quoteToken ? {
+        address: dexData.quoteToken.address,
+        name: dexData.quoteToken.name,
+        symbol: dexData.quoteToken.symbol
+      } : undefined
     };
   } catch (error) {
     console.error('Error fetching SBC token info:', error);
@@ -58,7 +94,7 @@ export const getSBCTokenInfo = async (): Promise<TokenInfo> => {
 // Get real-time price for SBC token
 export const getSBCPrice = async (): Promise<{ price: number; change24h: number }> => {
   try {
-    const response = await axios.get(`${DEXSCREENER_API}/tokens/${SBC_CONTRACT_ADDRESS}`);
+    const response = await axios.get(`${DEXSCREENER_API}/search?q=${SBC_CONTRACT_ADDRESS}`);
     const priceData = response.data?.pairs?.[0];
     
     return {
@@ -114,4 +150,43 @@ export const formatCurrency = (amount: number): string => {
 export const formatPercentage = (value: number): string => {
   const sign = value >= 0 ? '+' : '';
   return `${sign}${value.toFixed(2)}%`;
+};
+
+export const formatVolume = (volume: number): string => {
+  if (volume >= 1e9) {
+    return `$${(volume / 1e9).toFixed(2)}B`;
+  } else if (volume >= 1e6) {
+    return `$${(volume / 1e6).toFixed(2)}M`;
+  } else if (volume >= 1e3) {
+    return `$${(volume / 1e3).toFixed(2)}K`;
+  }
+  return `$${volume.toFixed(2)}`;
+};
+
+export const formatLiquidity = (liquidity: number): string => {
+  if (liquidity >= 1e6) {
+    return `$${(liquidity / 1e6).toFixed(2)}M`;
+  } else if (liquidity >= 1e3) {
+    return `$${(liquidity / 1e3).toFixed(2)}K`;
+  }
+  return `$${liquidity.toFixed(2)}`;
+};
+
+export const formatMarketCap = (marketCap: number): string => {
+  if (marketCap >= 1e9) {
+    return `$${(marketCap / 1e9).toFixed(2)}B`;
+  } else if (marketCap >= 1e6) {
+    return `$${(marketCap / 1e6).toFixed(2)}M`;
+  } else if (marketCap >= 1e3) {
+    return `$${(marketCap / 1e3).toFixed(2)}K`;
+  }
+  return `$${marketCap.toFixed(2)}`;
+};
+
+export const formatDate = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 };

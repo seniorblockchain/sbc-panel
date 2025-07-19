@@ -85,7 +85,7 @@ const PriceChart: React.FC = () => {
       } catch (error) {
         console.error('Error updating price:', error);
       }
-    }, 60000);
+    }, 45000); // Sync with token data refresh
 
     return () => clearInterval(interval);
   }, []);
