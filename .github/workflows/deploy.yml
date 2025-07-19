@@ -21,15 +21,37 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Dependencies with platform-specific binaries
+        run: |
+          npm install
+          npm install @rollup/rollup-linux-x64-gnu --save-optional
+          npm rebuild
+        env:
+          npm_config_target_platform: linux
+          npm_config_target_arch: x64
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Verify Rollup installation
+        run: |
+          ls node_modules/@rollup/ || echo "No @rollup directory found"
+          npm list rollup
 
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
+
+      - name: Fallback build (if main build fails)
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install --no-optional
+          npm install rollup vite
+          npm run build
 
       - name: Create 404 page
         run: cp dist/index.html dist/404.html
