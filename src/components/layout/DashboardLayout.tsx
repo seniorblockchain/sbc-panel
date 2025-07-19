@@ -1,34 +1,45 @@
-import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useState } from 'react';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import Sidebar from './Sidebar';
+import Header from './Header';
 
 interface DashboardLayoutProps {
-  children: ReactNode;
-  sidebar: ReactNode;
-  header: ReactNode;
-  className?: string;
+  children: React.ReactNode;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-export function DashboardLayout({ children, sidebar, header, className }: DashboardLayoutProps) {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
+  children, 
+  activeTab, 
+  onTabChange 
+}) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <div className={cn("min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900", className)}>
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-gray-700/50 bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-gray-900/80">
-        {header}
-      </header>
-      
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="sticky top-16 h-[calc(100vh-4rem)] w-64 border-r border-gray-700/50 bg-gray-900/90 backdrop-blur overflow-y-auto hidden lg:block">
-          {sidebar}
-        </aside>
+    <TonConnectUIProvider manifestUrl="/tonconnect-manifest.json">
+      <div className="min-h-screen bg-background flex">
+        <Sidebar 
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          isOpen={sidebarOpen}
+          onToggle={toggleSidebar}
+        />
         
-        {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
+        <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
+          <Header onMenuToggle={toggleSidebar} />
+          
+          <main className="flex-1 p-6 overflow-auto bg-muted/30">
             {children}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
+    </TonConnectUIProvider>
   );
-}
+};
+
+export default DashboardLayout;

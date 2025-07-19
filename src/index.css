@@ -49,7 +49,7 @@
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.606 0.25 292.717);
+  --primary: oklch(0.64 0.19 248.5);
   --primary-foreground: oklch(0.969 0.016 293.756);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
@@ -60,7 +60,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.606 0.25 292.717);
+  --ring: oklch(0.64 0.19 248.5);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -68,12 +68,12 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.606 0.25 292.717);
+  --sidebar-primary: oklch(0.64 0.19 248.5);
   --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
   --sidebar-accent: oklch(0.967 0.001 286.375);
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.606 0.25 292.717);
+  --sidebar-ring: oklch(0.64 0.19 248.5);
 }
 
 .dark {
@@ -83,7 +83,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.541 0.281 293.009);
+  --primary: oklch(67.958% 0.17023 246.991);
   --primary-foreground: oklch(0.969 0.016 293.756);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
@@ -94,7 +94,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.541 0.281 293.009);
+  --ring: oklch(67.958% 0.17023 246.991);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -102,12 +102,12 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.541 0.281 293.009);
+  --sidebar-primary: oklch(67.958% 0.17023 246.991);
   --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
   --sidebar-accent: oklch(0.274 0.006 286.033);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.541 0.281 293.009);
+  --sidebar-ring: oklch(67.958% 0.17023 246.991);
 }
 
 @layer base {
@@ -116,5 +116,131 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
+  
+  /* Ensure text colors are properly inherited */
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--foreground));
+  }
+  
+  p {
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+/* TON Connect Button Styling */
+tc-root {
+  --tc-bg-color: hsl(var(--card));
+  --tc-border-color: hsl(var(--border));
+  --tc-primary-color: hsl(var(--primary));
+  --tc-text-color: hsl(var(--foreground));
+  --tc-secondary-text-color: hsl(var(--muted-foreground));
+}
+
+.tc-button {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: 1px solid hsl(var(--primary)) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.875rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  min-height: 2.75rem !important;
+  width: auto !important;
+  text-decoration: none !important;
+}
+
+.tc-button:hover {
+  background: hsl(var(--primary) / 0.9) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.3) !important;
+}
+
+.tc-button:active {
+  transform: translateY(0) !important;
+}
+
+/* Connected state button */
+.tc-button[data-tc-connected="true"] {
+  background: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.tc-button[data-tc-connected="true"]:hover {
+  background: hsl(var(--muted) / 0.8) !important;
+  box-shadow: 0 2px 8px hsl(var(--border)) !important;
+}
+
+.tc-modal {
+  --tc-bg-color: hsl(var(--popover));
+  --tc-border-color: hsl(var(--border));
+  --tc-text-color: hsl(var(--popover-foreground));
+}
+
+/* Chart specific styling */
+.chart-container h3 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.chart-container p {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Force text visibility in all components */
+.bg-card h1, .bg-card h2, .bg-card h3, .bg-card h4, .bg-card h5, .bg-card h6 {
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.bg-card p {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
