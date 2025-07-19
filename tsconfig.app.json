@@ -19,7 +19,6 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
@@ -29,10 +28,5 @@
       ]
     }
   },
-  "include": ["src"],
-  "exclude": [
-    "src/**/*.test.tsx",
-    "src/**/*.test.ts",
-    "src/test/**/*"
-  ]
+  "include": ["src"]
 }
