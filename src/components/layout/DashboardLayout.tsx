@@ -21,7 +21,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   return (
-    <TonConnectUIProvider manifestUrl="/tonconnect-manifest.json">
+    <TonConnectUIProvider manifestUrl="https://panel.seniorblockchain.io/tonconnect-manifest.json">
       <div className="min-h-screen bg-background flex">
         <Sidebar 
           activeTab={activeTab}
