@@ -17,7 +17,7 @@ export const getSBCTokenInfo = async (): Promise<TokenInfo> => {
     try {
       const dexResponse = await axios.get(`${DEXSCREENER_API}/search?q=${SBC_CONTRACT_ADDRESS}`);
       dexData = dexResponse.data?.pairs?.[0];
-    } catch (error) {
+    } catch {
       console.warn('DexScreener data not available');
     }
 
