@@ -1,0 +1,25 @@
+{
+  "name": "SBC Panel - Senior Blockchain Management Dashboard",
+  "short_name": "SBC Panel",
+  "description": "Senior Blockchain management dashboard for decentralized applications, Nostr integration, and Bitcoin Lightning network operations.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#8b5cf6",
+  "background_color": "#0f0f23",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "business", "finance"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
