@@ -77,6 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen, onTog
           <button
             onClick={onToggle}
             className="lg:hidden p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
+            title="Close sidebar"
           >
             <X className="w-5 h-5 text-sidebar-foreground" />
           </button>
