@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, ExternalLink, TrendingUp, Activity, Droplet, BarChart3, Clock, Users, RefreshCw } from 'lucide-react';
-import { getSBCTokenInfo, formatVolume, formatLiquidity, formatMarketCap, formatDate } from '../services/api';
+import { getSBCFullData, formatVolume, formatLiquidity, formatMarketCap, formatDate } from '../services/api';
 import type { TokenInfo } from '../types';
 
 const TokenPriceCard: React.FC = () => {
@@ -18,7 +18,7 @@ const TokenPriceCard: React.FC = () => {
           setIsRefreshing(true);
         }
         
-        const info = await getSBCTokenInfo();
+        const info = await getSBCFullData();
         setTokenInfo(info);
         setError(null);
       } catch (err) {

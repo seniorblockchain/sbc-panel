@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import DashboardLayout from './components/layout/DashboardLayout';
 import TokenPriceCard from './components/TokenPriceCard';
+import TokenInfoCard from './components/TokenInfoCard';
+import ExchangeDataCard from './components/ExchangeDataCard';
 import WalletCard from './components/WalletCard';
 import ProjectsOverview from './components/ProjectsOverview';
 import PriceChart from './components/PriceChart';
@@ -14,12 +16,16 @@ function SBCDashboard() {
       case 'dashboard':
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              <div className="xl:col-span-2">
-                <TokenPriceCard />
-              </div>
+            {/* New separate token and exchange data cards */}
+            <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
               <div>
-                <WalletCard />
+                <TokenInfoCard />
+              </div>
+            </div>
+            {/* Combined view for comparison */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="xl:col-span-2">
+                <ExchangeDataCard />
               </div>
             </div>
             <div>
@@ -34,12 +40,12 @@ function SBCDashboard() {
           </div>
         );
       case 'projects':
-        return <ProjectsOverview />;
+  return <ProjectsOverview />;
       case 'settings':
         return (
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Settings</h3>
-            <p className="text-gray-600">Settings panel coming soon...</p>
+          <div className="bg-card rounded-xl shadow-lg p-6 border border-border">
+            <h3 className="text-lg font-semibold text-card-foreground mb-4">Settings</h3>
+            <p className="text-muted-foreground">Settings panel coming soon...</p>
           </div>
         );
       default:
